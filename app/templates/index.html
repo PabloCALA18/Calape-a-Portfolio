@@ -1,0 +1,211 @@
+{% extends "base.html" %}
+{% from "_macros.html" import acciones, boton_agregar, miniatura with context %}
+
+{% block contenido %}
+
+{# ================= BANNER + FOTO ================= #}
+<section class="banner">
+  {% if perfil.banner %}
+    <img src="{{ img_url(perfil.banner) }}" alt="Banner">
+  {% else %}
+    <span class="banner-texto">Banner</span>
+  {% endif %}
+  {% if current_user.is_authenticated %}
+    <button class="btn-circ banner-edit" onclick="abrirImagen('banner')" title="Cambiar banner"><i class="fa-solid fa-pen"></i></button>
+  {% endif %}
+</section>
+
+{# ================= ACERCA DE ================= #}
+<section class="acerca reveal" id="acerca">
+  <div class="acerca-lateral">
+    <div class="foto-wrap">
+      {% if perfil.foto %}
+        <img class="foto" src="{{ img_url(perfil.foto) }}" alt="Foto de perfil">
+      {% else %}
+        <div class="foto foto-vacia"><i class="fa-solid fa-user"></i></div>
+      {% endif %}
+      {% if current_user.is_authenticated %}
+        <button class="btn-circ foto-edit" onclick="abrirImagen('foto')" title="Cambiar foto"><i class="fa-solid fa-pen"></i></button>
+      {% endif %}
+    </div>
+    <h2 class="acerca-nombre">{{ perfil.nombre }}</h2>
+    <p class="acerca-titulo">{{ perfil.titulo }}</p>
+    <a class="btn-verde" href="{{ url_for('descargar_cv') }}"><i class="fa-solid fa-download"></i> Descargar CV</a>
+  </div>
+
+  <div class="acerca-texto">
+    <div class="seccion-cab">
+      <h2>Acerca de</h2>
+      {% if current_user.is_authenticated %}
+        <button class="btn-circ" onclick="document.getElementById('modal-perfil').showModal()" title="Editar"><i class="fa-solid fa-pen"></i></button>
+      {% endif %}
+    </div>
+    <p>{{ perfil.acerca_de or 'Escribí una breve presentación profesional sobre vos.' }}</p>
+  </div>
+</section>
+
+{# ================= EXPERIENCIA ================= #}
+<section class="seccion reveal" id="experiencia">
+  <div class="seccion-cab"><h2>Experiencia</h2>{{ boton_agregar('experiencia') }}</div>
+  <div class="lista" data-sortable data-seccion="experiencia">
+    {% for e in perfil.experiencias %}
+      <article class="item" data-id="{{ e.id }}">
+        {{ miniatura(e.logo) }}
+        <div class="item-texto">
+          <h4>{{ e.puesto }} · {{ e.empresa }}</h4>
+          <small>{{ e.fecha_inicio.strftime('%m/%Y') if e.fecha_inicio }} – {{ e.fecha_fin.strftime('%m/%Y') if e.fecha_fin else 'Actualidad' }}</small>
+          <p>{{ e.descripcion or '' }}</p>
+        </div>
+        {{ acciones('experiencia', e) }}
+      </article>
+    {% else %}
+      <p class="vacio">Todavía no hay experiencia cargada. Este espacio queda reservado para el futuro.</p>
+    {% endfor %}
+  </div>
+</section>
+
+{# ================= EDUCACIÓN ================= #}
+<section class="seccion reveal" id="educacion">
+  <div class="seccion-cab"><h2>Educación</h2>{{ boton_agregar('educacion') }}</div>
+  <div class="lista" data-sortable data-seccion="educacion">
+    {% for ed in perfil.estudios %}
+      <article class="item" data-id="{{ ed.id }}">
+        {{ miniatura(ed.logo) }}
+        <div class="item-texto">
+          <h4>{{ ed.titulo }}</h4>
+          <small>{{ ed.institucion }} · {{ ed.anio_inicio or '' }} – {{ ed.anio_fin or 'En curso' }}</small>
+          <p>{{ ed.descripcion or '' }}</p>
+        </div>
+        {{ acciones('educacion', ed) }}
+      </article>
+    {% else %}
+      <p class="vacio">Todavía no hay estudios cargados.</p>
+    {% endfor %}
+  </div>
+</section>
+
+{# ================= SKILLS ================= #}
+<section class="seccion reveal" id="skills">
+  <div class="seccion-cab"><h2>Hard &amp; Soft Skills</h2>{{ boton_agregar('skill') }}</div>
+
+  {% for titulo, tipo in [('Hard Skills', 'hard'), ('Soft Skills', 'soft'), ('Idiomas', 'idioma')] %}
+    {% set lista = perfil.skills | selectattr('tipo', 'equalto', tipo) | list %}
+    {% if lista %}
+      <h3 class="sub">{{ titulo }}</h3>
+      <div class="skills-grid" data-sortable data-seccion="skill">
+        {% for s in lista %}
+          <div class="skill" data-id="{{ s.id }}">
+            <div class="circulo">
+              {# ANIMACIÓN: el círculo se llena al aparecer en pantalla (ver main.js y base.css) #}
+              <svg viewBox="0 0 100 100">
+                <circle class="fondo" cx="50" cy="50" r="45"/>
+                <circle class="progreso" cx="50" cy="50" r="45"
+                        style="--offset: {{ (283 - 283 * s.porcentaje / 100) | round(1) }}"/>
+              </svg>
+              <span>{{ s.porcentaje }}%</span>
+            </div>
+            <p>{{ s.nombre }}</p>
+            {{ acciones('skill', s) }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% else %}{% endfor %}
+</section>
+
+{# ================= PROYECTOS ================= #}
+<section class="seccion reveal" id="proyectos">
+  <div class="seccion-cab"><h2>Proyectos</h2>{{ boton_agregar('proyecto') }}</div>
+  <div class="lista" data-sortable data-seccion="proyecto">
+    {% for p in perfil.proyectos %}
+      <article class="item proyecto" data-id="{{ p.id }}">
+        {{ miniatura(p.imagen) }}
+        <div class="item-texto">
+          <h4>{{ p.nombre }}</h4>
+          <small>{{ p.fecha.strftime('%d/%m/%Y') if p.fecha }}</small>
+          <p>{{ p.descripcion or '' }}</p>
+          {% if p.link %}<a class="btn-verde chico" href="{{ p.link }}" target="_blank" rel="noopener">Ver proyecto</a>{% endif %}
+        </div>
+        {{ acciones('proyecto', p) }}
+      </article>
+    {% else %}
+      <p class="vacio">Todavía no hay proyectos cargados.</p>
+    {% endfor %}
+  </div>
+</section>
+
+{# ================= IFRAME (requisito del TP) ================= #}
+<section class="seccion reveal" id="ubicacion">
+  <h2>Dónde encontrarme</h2>
+  {# Cambiá TU+CIUDAD por tu ciudad, ej: Cordoba+Argentina #}
+  <iframe class="mapa" loading="lazy" title="Mapa"
+          src="https://www.google.com/maps?q=TU+CIUDAD&output=embed"></iframe>
+</section>
+
+
+{# ================= MODALES DE EDICIÓN (solo con sesión) ================= #}
+{% if current_user.is_authenticated %}
+
+  {# Un modal por cada sección, armado desde SECCIONES (routes.py) #}
+  {% for sec, cfg in SECCIONES.items() %}
+  <dialog id="modal-{{ sec }}">
+    <form method="POST" enctype="multipart/form-data" action="">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <h3 class="modal-titulo">{{ cfg.titulo }}</h3>
+
+      {% for campo in cfg.campos %}
+        <label>{{ campo.label }}
+          {% if campo.tipo == 'textarea' %}
+            <textarea name="{{ campo.nombre }}" rows="4"></textarea>
+          {% elif campo.tipo == 'select' %}
+            <select name="{{ campo.nombre }}">
+              {% for o in campo.opciones %}<option value="{{ o }}">{{ o | capitalize }}</option>{% endfor %}
+            </select>
+          {% else %}
+            <input type="{{ campo.tipo }}" name="{{ campo.nombre }}" {{ 'required' if campo.req }}>
+          {% endif %}
+        </label>
+      {% endfor %}
+
+      {% if cfg.imagen %}
+        <label>Imagen / logo <input type="file" name="{{ cfg.imagen }}" accept="image/*"></label>
+      {% endif %}
+
+      <div class="modal-botones">
+        <button type="button" class="btn-cancelar" onclick="this.closest('dialog').close()">Cancelar</button>
+        <button class="btn-verde">Guardar</button>
+      </div>
+    </form>
+  </dialog>
+  {% endfor %}
+
+  {# Modal de datos del perfil #}
+  <dialog id="modal-perfil">
+    <form method="POST" action="{{ url_for('perfil_editar') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <h3>Editar perfil</h3>
+      <label>Nombre <input name="nombre" value="{{ perfil.nombre }}" required></label>
+      <label>Título <input name="titulo" value="{{ perfil.titulo or '' }}"></label>
+      <label>Acerca de <textarea name="acerca_de" rows="6">{{ perfil.acerca_de or '' }}</textarea></label>
+      <div class="modal-botones">
+        <button type="button" class="btn-cancelar" onclick="this.closest('dialog').close()">Cancelar</button>
+        <button class="btn-verde">Guardar</button>
+      </div>
+    </form>
+  </dialog>
+
+  {# Modal para cambiar foto, banner o logo #}
+  <dialog id="modal-imagen">
+    <form method="POST" enctype="multipart/form-data" action="">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <h3>Cambiar imagen</h3>
+      <label>Elegí un archivo <input type="file" name="archivo" accept="image/*" required></label>
+      <div class="modal-botones">
+        <button type="button" class="btn-cancelar" onclick="this.closest('dialog').close()">Cancelar</button>
+        <button class="btn-verde">Subir</button>
+      </div>
+    </form>
+  </dialog>
+
+{% endif %}
+{% endblock %}

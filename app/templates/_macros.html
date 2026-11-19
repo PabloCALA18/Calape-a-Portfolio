@@ -1,0 +1,33 @@
+{# Botones de lápiz y "X" de cada elemento (solo con sesión iniciada) #}
+{% macro acciones(seccion, item) %}
+  {% if current_user.is_authenticated %}
+  <div class="acciones">
+        <button type="button" class="btn-circ" title="Editar"
+          data-seccion='{{ seccion|tojson|forceescape }}'
+          data-item='{{ item.datos()|tojson|forceescape }}'
+          onclick="abrirModal(JSON.parse(this.dataset.seccion), JSON.parse(this.dataset.item))">
+      <i class="fa-solid fa-pen"></i>
+    </button>
+    <form method="POST" action="{{ url_for('eliminar', seccion=seccion, id=item.id) }}"
+          onsubmit="return confirm('¿Eliminar este elemento?')">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button class="btn-circ" title="Eliminar"><i class="fa-solid fa-xmark"></i></button>
+    </form>
+  </div>
+  {% endif %}
+{% endmacro %}
+
+{% macro boton_agregar(seccion) %}
+  {% if current_user.is_authenticated %}
+    <button type="button" class="btn-verde chico" onclick='abrirModal("{{ seccion }}")'>
+      <i class="fa-solid fa-plus"></i> Agregar
+    </button>
+  {% endif %}
+{% endmacro %}
+
+{# Cuadrado gris a la izquierda de cada ítem (logo o imagen) #}
+{% macro miniatura(ruta) %}
+  <div class="miniatura">
+    {% if ruta %}<img src="{{ img_url(ruta) }}" alt="">{% endif %}
+  </div>
+{% endmacro %}

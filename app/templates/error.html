@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block contenido %}
+<section class="login-box" style="text-align:center">
+  <h1 style="font-size:4rem;color:var(--verde)">{{ codigo }}</h1>
+  <p>{{ mensaje }}</p>
+  <a class="btn-verde" href="{{ url_for('index') }}">Volver al inicio</a>
+</section>
+{% endblock %}

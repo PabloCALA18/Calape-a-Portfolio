@@ -68,6 +68,14 @@ class ItemPortfolio(db.Model):
     def eliminar(self):
         db.session.delete(self)
         db.session.commit()
+        
+    def datos(self):
+        """Devuelve todas las columnas como diccionario (lo usa el modal de edición)."""
+        d = {}
+        for col in self.__table__.columns:
+            valor = getattr(self, col.key)
+            d[col.key] = valor.isoformat() if hasattr(valor, "isoformat") else valor
+        return d
 
 
 class Perfil(db.Model):

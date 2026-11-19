@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block titulo %}Login{% endblock %}
+
+{% block contenido %}
+<section class="login-box">
+  <h2>Iniciar sesión</h2>
+  <form method="POST">
+    {{ form.hidden_tag() }}
+    <p>{{ form.username.label }} {{ form.username() }}</p>
+    <p>{{ form.password.label }} {{ form.password() }}</p>
+    {{ form.submit() }}
+  </form>
+</section>
+{% endblock %}

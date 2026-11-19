@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <title>{% block titulo %}{{ perfil.nombre ~ ' | Portfolio' if perfil else 'Portfolio' }}{% endblock %}</title>
+  <link rel="icon" href="{{ url_for('static', filename='img/favicon.png') }}">
+
+  <!-- Fuente de Google Fonts e íconos de FontAwesome -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+  {% block extra_css %}{% endblock %}
+</head>
+<body data-editando="{{ 1 if current_user.is_authenticated else 0 }}">
+
+<header class="header">
+  <div class="header-izq">
+  <nav class="menu">
+    <a href="{{ url_for('index') }}#acerca">Acerca de</a>
+    <a href="{{ url_for('index') }}#experiencia">Experiencia</a>
+    <a href="{{ url_for('index') }}#educacion">Educación</a>
+    <a href="{{ url_for('index') }}#skills">Skills</a>
+    <a href="{{ url_for('index') }}#proyectos">Proyectos</a>
+  </nav>
+    <div class="logo-wrap">
+      {% if perfil and perfil.logo %}
+        <img class="logo" src="{{ img_url(perfil.logo) }}" alt="Logo">
+      {% else %}
+        <span class="logo-vacio"></span>
+      {% endif %}
+      {% if current_user.is_authenticated %}
+        <button class="btn-circ chico" onclick="abrirImagen('logo')" title="Cambiar logo"><i class="fa-solid fa-pen"></i></button>
+      {% endif %}
+    </div>
+    <a class="header-nombre" href="{{ url_for('index') }}">{{ perfil.nombre if perfil else 'Mi Portfolio' }}</a>
+  </div>
+
+  <nav class="header-der">
+    {% if perfil %}
+      {% for red in perfil.redes %}
+        <span class="red">
+          <a href="{{ red.url }}" target="_blank" rel="noopener" title="{{ red.nombre }}">
+            <i class="{{ red.icono or 'fa-solid fa-link' }}"></i>
+          </a>
+          {% if current_user.is_authenticated %}
+            <form method="POST" action="{{ url_for('eliminar', seccion='red_social', id=red.id) }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button class="btn-x-mini" title="Quitar">×</button>
+            </form>
+          {% endif %}
+        </span>
+      {% endfor %}
+    {% endif %}
+
+    {% if current_user.is_authenticated %}
+      <button class="btn-circ chico" onclick='abrirModal("red_social")' title="Agregar red"><i class="fa-solid fa-plus"></i></button>
+      <a class="btn-sesion" href="{{ url_for('logout') }}">Logout</a>
+    {% else %}
+      <a class="btn-sesion" href="{{ url_for('login') }}">Login</a>
+    {% endif %}
+  </nav>
+</header>
+
+{% for m in get_flashed_messages() %}<p class="flash">{{ m }}</p>{% endfor %}
+
+<main>{% block contenido %}{% endblock %}</main>
+
+<footer class="footer">© {{ perfil.nombre if perfil else '' }} · Portfolio web</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
