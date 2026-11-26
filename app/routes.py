@@ -132,7 +132,7 @@ def registrar_rutas(app):
         return url_for("static", filename="img/" + ruta)
 
     app.jinja_env.globals["img_url"] = img_url
-    @app.errorhandler(403)
+    @app.errorhandler(403)  
     @app.errorhandler(404)
     @app.errorhandler(500)
     def error(e):
@@ -155,6 +155,11 @@ def registrar_rutas(app):
     def index():
         return render_template("index.html")
 
+    @app.route("/descargar-documentacion")
+    def descargar_documentacion():
+        carpeta = os.path.join(current_app.static_folder, "docs")
+        return send_from_directory(carpeta, "documentacion.pdf", as_attachment=True,
+                                   download_name="Documentacion_Portfolio.pdf")
     @app.route("/descargar-cv")
     def descargar_cv():
         carpeta = os.path.join(current_app.static_folder, "cv")

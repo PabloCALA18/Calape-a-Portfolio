@@ -139,9 +139,91 @@
   <h2>Dónde encontrarme</h2>
   {# Cambiá TU+CIUDAD por tu ciudad, ej: Cordoba+Argentina #}
   <iframe class="mapa" loading="lazy" title="Mapa"
-          src="https://www.google.com/maps?q=TU+CIUDAD&output=embed"></iframe>
+          src="https://www.google.com/maps?q=Cordoba+Argentina&output=embed"></iframe>
 </section>
+{# ================= DOCUMENTOS ================= #}
+<section class="seccion reveal" id="documentos">
+  <div class="seccion-cab"><h2>Documentos</h2></div>
 
+  <div class="docs-grid">
+    <article class="doc-card">
+      <i class="fa-solid fa-file-pdf"></i>
+      <div>
+        <h4>Currículum Vitae</h4>
+        <p>Mi CV en formato PDF.</p>
+        <a class="btn-verde chico" href="{{ url_for('descargar_cv') }}">
+          <i class="fa-solid fa-download"></i> Descargar
+        </a>
+        <a class="btn-claro" href="{{ url_for('static', filename='cv/cv.pdf') }}"
+           target="_blank" rel="noopener">Ver</a>
+      </div>
+    </article>
+
+    <article class="doc-card">
+      <i class="fa-solid fa-book"></i>
+      <div>
+        <h4>Documentación del proyecto</h4>
+        <p>Planificación, objetivo, descripción y desarrollo de este portfolio.</p>
+        <a class="btn-verde chico" href="{{ url_for('descargar_documentacion') }}">
+          <i class="fa-solid fa-download"></i> Descargar
+        </a>
+        <a class="btn-claro" href="{{ url_for('static', filename='docs/documentacion.pdf') }}"
+           target="_blank" rel="noopener">Ver</a>
+      </div>
+    </article>
+  </div>
+</section>
+{# ================= CONTACTO + UBICACIÓN (con IFRAME) ================= #}
+<section class="seccion reveal" id="contacto">
+  <div class="seccion-cab">
+    <h2>Contacto</h2>
+    {% if current_user.is_authenticated %}
+      <button class="btn-circ" onclick="document.getElementById('modal-perfil').showModal()" title="Editar contacto"><i class="fa-solid fa-pen"></i></button>
+    {% endif %}
+  </div>
+
+  <div class="contacto-grid">
+    <div class="contacto-lista">
+      {% if perfil.email %}
+        <a class="contacto-item" href="mailto:{{ perfil.email }}">
+          <i class="fa-solid fa-envelope"></i>
+          <div><small>Email</small>{{ perfil.email }}</div>
+        </a>
+      {% endif %}
+
+      {% if perfil.telefono %}
+        {% set solo_numeros = perfil.telefono | replace('+', '') | replace(' ', '') | replace('-', '') %}
+        <a class="contacto-item" href="https://wa.me/{{ solo_numeros }}" target="_blank" rel="noopener">
+          <i class="fa-brands fa-whatsapp"></i>
+          <div><small>WhatsApp</small>{{ perfil.telefono }}</div>
+        </a>
+      {% endif %}
+
+      {% if perfil.ubicacion %}
+        <div class="contacto-item">
+          <i class="fa-solid fa-location-dot"></i>
+          <div><small>Ubicación</small>{{ perfil.ubicacion }}</div>
+        </div>
+      {% endif %}
+
+      {% for red in perfil.redes %}
+        <a class="contacto-item" href="{{ red.url }}" target="_blank" rel="noopener">
+          <i class="{{ red.icono or 'fa-solid fa-link' }}"></i>
+          <div><small>{{ red.nombre }}</small>{{ red.url | replace('https://', '') | replace('http://', '') | replace('www.', '') }}</div>
+        </a>
+      {% endfor %}
+
+      {% if not (perfil.email or perfil.telefono or perfil.ubicacion or perfil.redes) %}
+        <p class="vacio">Cargá tus datos de contacto con el lápiz.</p>
+      {% endif %}
+    </div>
+
+    {% if perfil.ubicacion %}
+      <iframe class="mapa" loading="lazy" title="Mapa de ubicación"
+              src="https://www.google.com/maps?q={{ perfil.ubicacion | urlencode }}&output=embed"></iframe>
+    {% endif %}
+  </div>
+</section>
 
 {# ================= MODALES DE EDICIÓN (solo con sesión) ================= #}
 {% if current_user.is_authenticated %}
